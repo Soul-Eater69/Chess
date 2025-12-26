@@ -1,0 +1,26 @@
+{
+  "name": "chess-server",
+  "version": "1.0.0",
+  "description": "Chess multiplayer game WebSocket server",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["chess", "websocket", "multiplayer"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^8.14.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/ws": "^8.5.8",
+    "@types/uuid": "^9.0.7",
+    "typescript": "^5.3.2",
+    "ts-node-dev": "^2.0.0"
+  }
+}
