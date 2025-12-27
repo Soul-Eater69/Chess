@@ -18,18 +18,21 @@ export default function Home() {
     const client = new WebSocketClient('ws://localhost:8080');
 
     client.on(MessageType.GAME_CREATED, (payload) => {
+      if (!payload) return;
       setGameId(payload.gameId);
       setPlayerColor(payload.playerColor);
       setGameState(payload.gameState);
     });
 
     client.on(MessageType.GAME_JOINED, (payload) => {
+      if (!payload) return;
       setGameId(payload.gameId);
       setPlayerColor(payload.playerColor);
       setGameState(payload.gameState);
     });
 
     client.on(MessageType.GAME_STATE, (payload) => {
+      if (!payload) return;
       if (payload.gameState) {
         setGameState(payload.gameState);
       }
@@ -39,23 +42,28 @@ export default function Home() {
     });
 
     client.on(MessageType.MOVE_MADE, (payload) => {
+      if (!payload || !payload.gameState) return;
       setGameState(payload.gameState);
     });
 
     client.on(MessageType.PLAYER_JOINED, (payload) => {
+      if (!payload || !payload.gameState) return;
       setGameState(payload.gameState);
     });
 
     client.on(MessageType.PLAYER_LEFT, (payload) => {
+      if (!payload || !payload.gameState) return;
       setGameState(payload.gameState);
     });
 
     client.on(MessageType.INVALID_MOVE, (payload) => {
+      if (!payload) return;
       setError(payload.message || 'Invalid move');
       setTimeout(() => setError(null), 3000);
     });
 
     client.on(MessageType.ERROR, (payload) => {
+      if (!payload) return;
       setError(payload.error);
       setTimeout(() => setError(null), 5000);
     });
