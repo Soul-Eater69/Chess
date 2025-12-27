@@ -55,6 +55,12 @@ export class Game {
         break;
       }
     }
+
+    // If less than 2 players, set status back to waiting
+    if (this.players.size < 2) {
+      this.status = GameStatus.WAITING;
+      this.winner = undefined;
+    }
   }
 
   getPlayerColor(playerId: string): Color | null {

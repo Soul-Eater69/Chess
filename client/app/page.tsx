@@ -54,6 +54,8 @@ export default function Home() {
     client.on(MessageType.PLAYER_LEFT, (payload) => {
       if (!payload || !payload.gameState) return;
       setGameState(payload.gameState);
+      setError('Opponent disconnected. Waiting for a new player...');
+      setTimeout(() => setError(null), 5000);
     });
 
     client.on(MessageType.INVALID_MOVE, (payload) => {
@@ -92,6 +94,15 @@ export default function Home() {
   const handleJoinGame = () => {
     if (wsClient) {
       wsClient.joinGame();
+    }
+  };
+
+  const handleLeaveGame = () => {
+    if (wsClient) {
+      wsClient.leaveGame();
+      setGameState(null);
+      setGameId(null);
+      setPlayerColor(null);
     }
   };
 
@@ -172,6 +183,12 @@ export default function Home() {
               {gameId && (
                 <p className="text-sm text-gray-500 mt-2">Game ID: {gameId}</p>
               )}
+              <button
+                onClick={handleLeaveGame}
+                className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
+              >
+                Leave Game
+              </button>
             </div>
           </div>
 
