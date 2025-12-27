@@ -147,13 +147,19 @@ export class WebSocketServer {
       }
     });
 
-    // Notify other player
-    this.broadcastToGame(game.id, {
-      type: MessageType.PLAYER_JOINED,
-      payload: {
-        gameState: game.getState()
+    // Notify opponent directly
+    const opponentId = this.gameManager.getOpponentId(client.id);
+    if (opponentId) {
+      const opponent = this.clients.get(opponentId);
+      if (opponent) {
+        this.sendMessage(opponent, {
+          type: MessageType.PLAYER_JOINED,
+          payload: {
+            gameState: game.getState()
+          }
+        });
       }
-    }, client.id);
+    }
   }
 
   private handleMakeMove(client: Client, payload: { move: Move }): void {
@@ -174,14 +180,25 @@ export class WebSocketServer {
       return;
     }
 
-    // Broadcast move to all players in the game
-    this.broadcastToGame(game.id, {
+    const moveMessage = {
       type: MessageType.MOVE_MADE,
       payload: {
         move: payload.move,
         gameState: game.getState()
       }
-    });
+    };
+
+    // Send to the player who made the move
+    this.sendMessage(client, moveMessage);
+
+    // Send to opponent
+    const opponentId = this.gameManager.getOpponentId(client.id);
+    if (opponentId) {
+      const opponent = this.clients.get(opponentId);
+      if (opponent) {
+        this.sendMessage(opponent, moveMessage);
+      }
+    }
   }
 
   private handleGetState(client: Client): void {
@@ -206,13 +223,22 @@ export class WebSocketServer {
     const game = this.gameManager.getPlayerGame(client.id);
 
     if (game) {
+      // Get opponent before leaving (so we can notify them)
+      const opponentId = this.gameManager.getOpponentId(client.id);
+
+      // Remove player from game
       this.gameManager.leaveGame(client.id);
 
-      // Notify other players
-      this.broadcastToGame(game.id, {
-        type: MessageType.PLAYER_LEFT,
-        payload: { gameState: game.getState() }
-      });
+      // Notify opponent directly
+      if (opponentId) {
+        const opponent = this.clients.get(opponentId);
+        if (opponent) {
+          this.sendMessage(opponent, {
+            type: MessageType.PLAYER_LEFT,
+            payload: { gameState: game.getState() }
+          });
+        }
+      }
     }
   }
 
@@ -233,20 +259,6 @@ export class WebSocketServer {
       type: MessageType.ERROR,
       payload: { error }
     });
-  }
-
-  private broadcastToGame(gameId: string, message: Message, excludeClientId?: string): void {
-    const game = this.gameManager.getGame(gameId);
-    if (!game) return;
-
-    for (const player of game.players.values()) {
-      if (player.id !== excludeClientId) {
-        const client = this.clients.get(player.id);
-        if (client) {
-          this.sendMessage(client, message);
-        }
-      }
-    }
   }
 
   getServer(): WebSocket.Server {

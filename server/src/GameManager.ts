@@ -84,4 +84,46 @@ export class GameManager {
   getAllGames(): Game[] {
     return Array.from(this.games.values());
   }
+
+  /**
+   * Get all player IDs in a game
+   */
+  getGamePlayerIds(gameId: string): string[] {
+    const game = this.games.get(gameId);
+    if (!game) return [];
+    return Array.from(game.players.values()).map(player => player.id);
+  }
+
+  /**
+   * Get the opponent's player ID for a given player in their game
+   */
+  getOpponentId(playerId: string): string | null {
+    const gameId = this.playerGameMap.get(playerId);
+    if (!gameId) return null;
+
+    const game = this.games.get(gameId);
+    if (!game) return null;
+
+    for (const player of game.players.values()) {
+      if (player.id !== playerId) {
+        return player.id;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Get all player IDs in a player's game except the player themselves
+   */
+  getOtherPlayersInGame(playerId: string): string[] {
+    const gameId = this.playerGameMap.get(playerId);
+    if (!gameId) return [];
+
+    const game = this.games.get(gameId);
+    if (!game) return [];
+
+    return Array.from(game.players.values())
+      .filter(player => player.id !== playerId)
+      .map(player => player.id);
+  }
 }
